@@ -8,12 +8,14 @@ Please read about (T)SSB project before using this converter.
 
 1. Clone cccsvparser library. From here https://github.com/JamesRamm/csv_parser or from here http://sourceforge.net/projects/cccsvparser/
 2. Clone this repository
-3. ```cd tcsv2tssb
-make```
+3. ```
+    cd tcsv2tssb
+    make
+    ```
 4. Now you can use tcsv2tssb program on any csv file with strings. E.g.
-```
-./tcsv2tssb examples/data.csv
-```
+    ```
+    ./tcsv2tssb examples/data.csv
+    ```
 5. You have generated two files in `examples` directory. First one is your `.ssb` file, second is `.h` file which may be useful in your target application if you're planning to know exact location of each table cell at compile time.
 
 ### What's the point of using TSSB as place to store strings with translations? You can use gettext!
