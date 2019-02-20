@@ -33,3 +33,13 @@ As you see, using gettext is possible, but I don't want to change locale every t
 
  * The overall quality of this program is not that good as `libtssb`. Also, relying `cccsvparser` libray, from my (and valgrind's) POV could be much better. But it's not my job to reinvent bicycle and make another-nobodyneedsit-csv-parsing library. If you have better replacement -- create PR or new issue.
  * Despite the fact that program was developed taking in account that it could be used under BIG ENDIAN machine, developer haven't such machine. So, there was no testing performed under BIG ENDIAN machine. Hope someone will do it for me.
+
+### How to use generated .ssb and .h files?
+
+1) .ssb: take a look at https://github.com/xdevelnet/ssb repo and tssb parser with it.
+2) .h: just include it to your project where tssb library will be used. Therefore you could acces 2dimensional array like this:
+   ```
+   arr[SSBLANG_A][SSBBASE_B]
+   ```
+
+   If you're getting compilation error, you should take a look at generated header file and check if it's correct. Most likely you got macro redefinitions, which may be caused by incorrect csv. Go fix your csv if you're going to use header file.

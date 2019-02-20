@@ -21,7 +21,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* Some portions of this software was based example csvparser library examples
+/* Some portions of this software was based on csvparser library examples
  * which is licensed under MIT license.
  *
  * Also, for my humble opinion, all these new and shiny libraries has lack
@@ -47,7 +47,7 @@
 #include <stdint.h>
 #include <limits.h>
 #include <assert.h>
-#include <csvparser.c> // https://github.com/JamesRamm/csv_parser or http://sourceforge.net/projects/cccsvparser/
+#include <csvparser.c> // http://sourceforge.net/projects/cccsvparser/
 
 #define strizeof(a) (sizeof(a)-1)
 #define SSB_BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
@@ -77,38 +77,10 @@ void *ememcpy(void *dest, const void *src, size_t n) {
 	return dest + n;
 }
 
-static inline uint16_t swap_uint16( uint16_t val ) {
-	return (val << 8) | (val >> 8 );
-}
-static inline uint32_t swap_uint32( uint32_t val ) {
-	val = ((val << 8) & 0xFF00FF00 ) | ((val >> 8) & 0xFF00FF );
-	return (val << 16) | (val >> 16);
-}
-//~ static inline uint64_t swap_uint64( uint64_t val ) {
-	//~ val = ((val << 8) & 0xFF00FF00FF00FF00ULL ) | ((val >> 8) & 0x00FF00FF00FF00FFULL );
-	//~ val = ((val << 16) & 0xFFFF0000FFFF0000ULL ) | ((val >> 16) & 0x0000FFFF0000FFFFULL );
-	//~ return (val << 32) | (val >> 32);
-//~ }
-
-//~ size_t size_t_retarded_byteorder_swap(size_t val) {
-	//~ // above
-	//~ // Swap bytes for size_t type variables
-	//~ #if (SIZE_MAX == 0xFFFF)
-		//~ return swap_uint16(val);
-	//~ #elif (SIZE_MAX == 0xFFFFFFFF)
-		//~ return swap_uint32(val);
-	//~ #elif (SIZE_MAX == 0xFFFFFFFFFFFFFFFF)
-		//~ return swap_uint64(val);
-	//~ #else
-		//~ #error TBD code SIZE_T_BITS
-	//~ #endif
-//~ }
-
 void swapbytes(void *pv, size_t n) {
 	// above
 	// Swap bytes in custom length block
 	assert(n > 0);
-	//if (!n) return;
 
 	char *p = pv;
 	size_t lo, hi;
@@ -141,17 +113,6 @@ int isalpha_real(char c) {
 	// above
 	// Like isalpha(), but really checks for ASCII latin character, so function argument have char type instead of int
 	return ((c >= 'a' and c <= 'z') or (c >= 'A' and c <= 'Z') ? 1 : 0);
-}
-
-void latincpy(void *dest, const void *src, size_t length) {
-	// above
-	// copies all latin characters from src memory area (which is length bytes long) to dest
-	register char *d = dest;
-	register const char *s = src;
-	while (s < (const char *) src + length) {
-		if (isalpha_real(*s)) *d++ = *s;
-		s++;
-	}
 }
 
 static inline char force_uppecase(char c) {
@@ -243,9 +204,7 @@ void ssb_and_h_add(const char *string, size_t row, size_t col, ssb_t *ssbo, int 
 	ssb_add(string, ssbo, false);
 }
 
-void add_meta(int fd, size_t location, size_t rows, size_t cols) {
-	uint32_t row = (uint32_t) rows;
-	uint32_t col = (uint32_t) cols;
+void add_meta(int fd, size_t location, uint32_t row, uint32_t col) {
 	if (IS_BIG_ENDIAN) swapbytes(&row, sizeof(col)), swapbytes(&col, sizeof(col)); // be to le
 	pwrite(fd, &row, sizeof(row), location);
 	pwrite(fd, &col, sizeof(col), location + sizeof(row));
@@ -262,8 +221,8 @@ int main(int argc, char **argv) {
 	CsvRow *row;
 	ssb_t ssbo = {.fd = ssbfd, .max = sizeof(uint16_t)};
 	ssb_add_header(&ssbo);
-	size_t colcount = 0;
-	size_t rowcount = 0;
+	uint32_t colcount = 0;
+	uint32_t rowcount = 0;
 	while ((row = CsvParser_getRow(csvparser)) ) {
 		// newline
 		char **rowFields = CsvParser_getFields(row);
