@@ -47,6 +47,7 @@
 #include <stdint.h>
 #include <limits.h>
 #include <assert.h>
+#include <sys/resource.h>
 #include <csvparser.c> // http://sourceforge.net/projects/cccsvparser/
 
 #define strizeof(a) (sizeof(a)-1)
@@ -58,6 +59,7 @@
 #define SHORTEST_POSSIBLE_CSV_FILENAME_LEN 4 // strlen("a.csv")
 #define HEADER_DEFINE_PREFIX_LANG "SSBLANG_"
 #define HEADER_DEFINE_PREFIX_BASES "SSBBASE_"
+#define STACK_REDUNDANCE 1024
 
 const char ssb_header_itself[] = "SSBTRANSLATI0NS_1";
 const char csv_ext_string[] = "csv";
@@ -92,9 +94,15 @@ void swapbytes(void *pv, size_t n) {
 }
 
 int check_rfile_prepare_wfilefd(const char *rfilename, const char *wfileextension) {
+	// above
 	// Check csv file for read and prepare writeonly file with same name, but different extension
+
 	size_t rfilename_len = strlen(rfilename);
 	size_t wfileextension_len = strlen(wfileextension);
+
+	struct rlimit l;
+	if (getrlimit(RLIMIT_STACK, &l) < 0) return perror("GETRLIMIT FAILED!"), POSIX_FAIL;
+	if (rfilename_len + wfileextension_len > l.rlim_cur - STACK_REDUNDANCE) return fprintf(stderr, "Filepath length is so big, that it can't fit in available stack!"), POSIX_FAIL;
 
 	if (rfilename_len < SHORTEST_POSSIBLE_CSV_FILENAME_LEN or memcmp(csv_ext_string, rfilename + rfilename_len - strizeof(csv_ext_string), strizeof(csv_ext_string)) != 0) {
 		fprintf(stderr, "%s is probably not csv file. If it is, it sould have at least \".csv\" at end of filename.\n", rfilename);
@@ -105,7 +113,7 @@ int check_rfile_prepare_wfilefd(const char *rfilename, const char *wfileextensio
 	memcpy(ememcpy(wfilename, rfilename, rfilename_len - strizeof(csv_ext_string)), wfileextension, wfileextension_len + 1); // + 1 because I need null terminator
 
 	int fd = open(wfilename, O_CREAT | O_TRUNC | O_WRONLY, 0644);
-	if (fd < 0) return perror(wfilename), errno;
+	if (fd < 0) return perror(wfilename), POSIX_FAIL;
 	return fd;
 }
 
