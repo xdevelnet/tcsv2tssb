@@ -6,7 +6,7 @@ Please read about (T)SSB project before using this converter.
 
 ### How to use it?
 
-1. Clone cccsvparser library. From here https://github.com/JamesRamm/csv_parser or from here http://sourceforge.net/projects/cccsvparser/
+1. Clone cccsvparser library. From here https://github.com/xdevelnet/cccsvparser or from here http://sourceforge.net/projects/cccsvparser/
 2. Clone this repository
 3. ```
     cd tcsv2tssb
