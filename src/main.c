@@ -233,7 +233,7 @@ int main(int argc, char **argv) {
 	uint32_t rowcount = 0;
 	while ((row = CsvParser_getRow(csvparser)) ) {
 		// newline
-		char **rowFields = CsvParser_getFields(row);
+		const char **rowFields = CsvParser_getFields(row);
 		for (colcount = 0 ; colcount < CsvParser_getNumFields(row) ; colcount++) {
 			ssb_and_h_add(rowFields[colcount], rowcount, colcount, &ssbo, headerfd);
 			//printf("FIELD: %s ", rowFields[colcount]);
